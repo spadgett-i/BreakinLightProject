@@ -52,6 +52,7 @@ public class PlayerHealth : MonoBehaviour
         return isInvulnerable;
     }
 
+    // ⚪ DAÑO NORMAL (respeta invulnerabilidad)
     public void TakeDamage()
     {
         if (hitsTaken >= 3) return;
@@ -66,6 +67,40 @@ public class PlayerHealth : MonoBehaviour
 
         if (hitsTaken >= 3)
             Die();
+    }
+
+    // 🔴 DAÑO ROJO (IGNORA invulnerabilidad y parry)
+    public void TakeTrueDamage()
+    {
+        if (hitsTaken >= 3) return;
+
+        hitsTaken++;
+        currentHealth -= damagePerHit;
+        if (currentHealth < 0) currentHealth = 0;
+
+        UpdateHealthUI();
+
+        Debug.Log("🔥 ATAQUE ROJO - Daño directo");
+
+        // Opcional: pequeño flash pero SIN invulnerabilidad
+        StartCoroutine(TrueDamageFlash());
+
+        if (hitsTaken >= 3)
+            Die();
+    }
+
+    IEnumerator TrueDamageFlash()
+    {
+        float timer = 0f;
+
+        while (timer < 0.2f)
+        {
+            spriteRenderer.enabled = !spriteRenderer.enabled;
+            yield return new WaitForSeconds(0.05f);
+            timer += 0.05f;
+        }
+
+        spriteRenderer.enabled = true;
     }
 
     IEnumerator InvulnerabilityRoutine()
@@ -128,7 +163,7 @@ public class PlayerHealth : MonoBehaviour
         {
             EnemyMeleeAttack enemyAttack = hit.GetComponent<EnemyMeleeAttack>();
             if (enemyAttack != null && !enemyAttack.isParryable)
-                continue; // NO parreable
+                continue;
 
             Enemy enemy = hit.GetComponent<Enemy>();
             if (enemy != null)
@@ -164,9 +199,7 @@ public class PlayerHealth : MonoBehaviour
         yield return ParryEnergyFlash();
 
         if (healParticles2D != null)
-        {
             healParticles2D.Play();
-        }
 
         if (hitsTaken > 0)
         {
@@ -180,16 +213,3 @@ public class PlayerHealth : MonoBehaviour
         yield return new WaitForSeconds(healFlashDuration);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

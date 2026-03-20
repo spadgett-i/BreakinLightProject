@@ -21,6 +21,10 @@ public class EnemyMeleeAttack : MonoBehaviour
     public bool isParryable = true; // ✅ Ataque parreable por defecto
 
     private bool isAttacking;
+
+    // 🔵 AGREGADO → ventana real de daño
+    private bool attackActive = false;
+
     private Vector3 pivotStartScale;
     private Vector3 pivotEndScale;
     private SpriteRenderer sr;
@@ -30,8 +34,8 @@ public class EnemyMeleeAttack : MonoBehaviour
 
     void Start()
     {
-        pivotStartScale = new Vector3(0f, 1f, 1f);
-        pivotEndScale = new Vector3(1f, 1f, 1f);
+        pivotStartScale = new Vector3(1f, 1f, 1f);
+        pivotEndScale = new Vector3(3f, 3f, 3f);
         attackPivot.localScale = pivotStartScale;
 
         sr = attackPivot.GetComponent<SpriteRenderer>();
@@ -89,7 +93,15 @@ public class EnemyMeleeAttack : MonoBehaviour
 
         // ATAQUE
         yield return ScalePivot(pivotStartScale, targetScale, windUpTime);
+
+        // 🔵 AGREGADO → activar ventana real de daño
+        attackActive = true;
+
         yield return new WaitForSeconds(attackDuration);
+
+        // 🔵 AGREGADO → desactivar ventana de daño
+        attackActive = false;
+
         yield return ScalePivot(targetScale, pivotStartScale, retractTime);
 
         transform.localScale = originalScale;
@@ -114,14 +126,10 @@ public class EnemyMeleeAttack : MonoBehaviour
     }
 
     public bool IsRedAttack() => isRedAttack;
+
+    // 🔵 AGREGADO → usado por EnemyAttackHitbox
+    public bool IsAttacking()
+    {
+        return attackActive;
+    }
 }
-
-
-
-
-
-
-
-
-
-
